@@ -1,0 +1,25 @@
+CustomerId,Name,Phone,Email,Address,RegisteredDate,Status
+CUST-101,Alice Johnson,+1-555-0101,alice.j@example.com,124 Pine Street; Seattle WA,2026-04-13,ACTIVE
+CUST-102,Robert Martinez,+1-555-0102,robert.m@example.com,456 Oak Avenue; Bellevue WA,2026-06-13,ACTIVE
+CUST-103,Elena Rostova,+1-555-0103,elena.r@example.com,789 Maple Drive; Redmond WA,2026-07-13,ACTIVE
+CUST-104,Marcus Vance,+1-555-0104,m.vance@example.com,321 Cedar Blvd; Kirkland WA,2026-08-13,ACTIVE
+CUST-105,Sophia Chen,+1-555-0105,schen@example.com,654 Elm Court; Tacoma WA,2026-09-13,ACTIVE
+CUST-106,Chairman Karamuzi,0761653765,chairman@gmail.com,Nabutiti,2026-10-13,ACTIVE
+CUST-107,Daniel,0773317856,daniel@gmail.com,Nabutiti Estate,2026-10-13,VIP
+CUST-108,Ilora Samantha,0782637456,ilori@gmail.com,Kampala,2026-10-16,SUSPENDED
+CUST-109,Okwi Brain,0783726354,okwibrain@gmail.com,Kansanga,2026-10-16,ACTIVE
+CUST-110,Mukiga Joy,0763625384,mukigajoy@gmail.com,MUtundwe,2026-10-16,ACTIVE
+CUST-111,Shafik Kusaga,0779543624,shafik.kusaga@gmail.com,Kansang,2026-10-16,ACTIVE
+CUST-112,Ilora Samantha,+256786655433,samatha@gmail.com,Kansanga,2026-10-16,ACTIVE
+CUST-113,Fizzo Teka,0783625357,fizzoteka@gmail.com,Buja,2026-10-17,ACTIVE
+CUST-114,Kabila Joseph,0753425172,kabilajoseph@gmail.com,Goma,2026-10-18,VIP
+CUST-115,Kawuuki Mugaga,0762635487,kawuukimugaga@gmail.com,kabalagala,2026-10-26,ACTIVE
+CUST-116,Juma Moses,0762534143,jumamoses@gmail.com,Ggaba,2026-10-26,ACTIVE
+CUST-117,Kintu Ashiraf,0744313060,ashirafbob7@gmail.com,Kitalanga,2026-10-26,ACTIVE
+CUST-118,Tizo Titi,0763524364,tizotiti@gmail.com,Beke,2026-10-27,ACTIVE
+CUST-119,Kyambadde Deo,0762534253,kyambaddedeo@gmail.com,Kyotela,2026-10-28,ACTIVE
+CUST-120,Nuwagaba Bruno,73625343567,nuwagababruno@gmail.com,Nabutiti,2026-10-28,ACTIVE
+CUST-121,Nzovu Giti,0764532457,nzovugiti@gmail.com,KGL,2026-10-29,ACTIVE
+CUST-122,AGATHA HEAVEN BABBY,0789675432,Agathahg@gmail.com,kasanga,2026-10-29,ACTIVE
+CUST-123,Opo John,0762595207,opjohn@gmail.com,Kabalagala,2026-10-29,VIP
+CUST-124,Hasasha sheilla,0745341243,hasashasheilla@gmail.com,Kansanga,2026-10-29,ACTIVE

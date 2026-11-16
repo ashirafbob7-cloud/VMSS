@@ -1,0 +1,4 @@
+ReviewId,ServiceId,CustomerId,CustomerName,MechanicId,MechanicName,Rating,Comment,ReviewDate
+REV-101,SRV-1001,CUST-101,Alice Johnson,MECH-101,Dave Miller,5,Dave did a fantastic and quick oil change! Car is running super quiet and smooth.,2026-10-08
+REV-102,SRV-1002,CUST-102,Robert Martinez,MECH-102,Sam Peterson,5,Front brakes feel brand new and pedal is very firm. Highly recommend Sam!,2026-10-13
+REV-103,SRV-1005,CUST-105,Sophia Chen,MECH-103,Sarah Lin,5,Sarah fixed our A/C climate control quickly. Honest diagnostic and fair price.,2026-10-16

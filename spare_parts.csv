@@ -1,0 +1,11 @@
+PartId,Name,Category,UnitPrice,StockQuantity,MinimumThreshold,Supplier
+PRT-101,Oil Filter OEM (Spin-on),Filtration,35000.00,24,10,Toyota Parts Direct Uganda
+PRT-102,Full Synthetic 5W-30 Motor Oil (4L),Fluids & Lubricants,160000.00,45,10,TotalEnergies Uganda
+PRT-103,Ceramic Front Brake Pads Set,Braking Systems,140000.00,0,0,Brembo East Africa
+PRT-104,Heavy-Duty Iridium Spark Plug (Set of 4),Engine & Ignition,120000.00,36,12,NGK Spark Plugs
+PRT-105,12V 70Ah Maintenance-Free Battery,Electrical & Battery,420000.00,4,4,Chloride Exide Uganda
+PRT-106,Activated Carbon Cabin Air Filter,Filtration,50000.00,18,5,Mann Filter Kampala
+PRT-107,Heavy Commercial Brake Rotor (Isuzu/Scania),Commercial & Tires,480000.00,2,2,Meritor Heavy Fleet
+PRT-108,DOT 4 Synthetic Brake Fluid (1L),Fluids & Lubricants,35000.00,20,6,Valvoline Lubricants
+PRT-109,Automatic Transmission Fluid ATF-WS (4L),Fluids & Lubricants,180000.00,4,4,Toyota Genuine ATF
+PRT-110,brakes,Braking Systems,35000.00,5,5,AutoSupply Co.Japan

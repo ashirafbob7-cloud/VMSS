@@ -1,0 +1,33 @@
+Username,Password,Role,LinkedId,FullName,Email,Phone,Active
+admin,admin123,ADMIN,ADMIN-1,Master Administrator,admin@autocare.com,+1-555-0100,true
+dave,dave123,MECHANIC,MECH-101,Dave Miller,dave@autocare.com,+1-555-0145,true
+sam,sam123,MECHANIC,MECH-102,Sam Peterson,sam@autocare.com,+1-555-0147,true
+sarah,sarah123,MECHANIC,MECH-103,Sarah Lin,sarah@autocare.com,+1-555-0144,true
+marcus,marcus123,MECHANIC,MECH-104,Marcus Reynolds,marcus@autocare.com,+1-555-0146,true
+okuma,okuma123,MECHANIC,MECH-105,Okuma,okuma@autocare.com,+1-555-0155,true
+alice,alice123,CUSTOMER,CUST-101,Alice Johnson,alice.j@example.com,+1-555-0101,true
+robert,robert123,CUSTOMER,CUST-102,Robert Martinez,robert.m@example.com,+1-555-0102,true
+elena,elena123,CUSTOMER,CUST-103,Elena Rostova,elena.r@example.com,+1-555-0103,true
+marcus_v,marcus123,CUSTOMER,CUST-104,Marcus Vance,m.vance@example.com,+1-555-0104,true
+sophia,sophia123,CUSTOMER,CUST-105,Sophia Chen,schen@example.com,+1-555-0105,true
+chairman,chairman123,CUSTOMER,CUST-106,Chairman Karamuzi,chairman@gmail.com,0761653765,true
+daniel,daniel123,CUSTOMER,CUST-107,Daniel,daniel@gmail.com,0773317856,true
+okwi.brain,cust123,CUSTOMER,CUST-109,Okwi Brain,okwibrain@gmail.com,0783726354,true
+mukiga.joy,cust123,CUSTOMER,CUST-110,Mukiga Joy,mukigajoy@gmail.com,0763625384,true
+shafik.kusaga,cust123,CUSTOMER,CUST-111,Shafik Kusaga,shafik.kusaga@gmail.com,0779543624,true
+ilora.samantha,cust123,CUSTOMER,CUST-112,Ilora Samantha,samatha@gmail.com,+256786655433,true
+fizzo.teka,cust123,CUSTOMER,CUST-113,Fizzo Teka,fizzoteka@gmail.com,0783625357,true
+kabila.joseph,cust123,CUSTOMER,CUST-114,Kabila Joseph,kabilajoseph@gmail.com,0753425172,true
+kawuuki.mugaga,cust123,CUSTOMER,CUST-115,Kawuuki Mugaga,kawuukimugaga@gmail.com,0762635487,true
+mukisa.jesa,mukisa123,MECHANIC,MECH-106,Mukisa Jesa,mukisajesa,+256-728251563,true
+juma.moses,cust123,CUSTOMER,CUST-116,Juma Moses,jumamoses@gmail.com,0762534143,true
+kintu.ashiraf,cust123,CUSTOMER,CUST-117,Kintu Ashiraf,ashirafbob7@gmail.com,0744313060,true
+mongo.mushi,mongopro,MECHANIC,MECH-107,Mongo Mushi,mongomushi@gmail.com,+256-752435136,true
+tizo.titi,cust123,CUSTOMER,CUST-118,Tizo Titi,tizotiti@gmail.com,0763524364,true
+kyambadde.deo,cust123,CUSTOMER,CUST-119,Kyambadde Deo,kyambaddedeo@gmail.com,0762534253,true
+nuwagaba.bruno,cust123,CUSTOMER,CUST-120,Nuwagaba Bruno,nuwagababruno@gmail.com,73625343567,true
+nzovu.giti,cust123,CUSTOMER,CUST-121,Nzovu Giti,nzovugiti@gmail.com,0764532457,true
+agatha.heaven.babby,cust123,CUSTOMER,CUST-122,AGATHA HEAVEN BABBY,Agathahg@gmail.com,0789675432,true
+opo.john,cust123,CUSTOMER,CUST-123,Opo John,opjohn@gmail.com,0762595207,true
+peter.odo,odo123,MECHANIC,MECH-108,Peter Odo,peterodo@gmail.com,+256-762534567,true
+hasasha.sheilla,cust123,CUSTOMER,CUST-124,Hasasha sheilla,hasashasheilla@gmail.com,0745341243,true

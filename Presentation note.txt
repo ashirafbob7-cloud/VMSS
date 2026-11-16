@@ -1,0 +1,1263 @@
+====================================================================================================
+               VEHICLE SERVICE & MAINTENANCE MANAGEMENT SYSTEM (VSMM UG)
+         ACADEMIC GROUP DISCUSSION & EXAMINER DEFENSE GUIDE: 50 SAMPLE QUESTIONS
+====================================================================================================
+PROJECT TITLE       : AutoCare Professional - Vehicle Service & Maintenance Management System
+TARGET AUDIENCE     : Academic Group Members, Project Presenters, Examination Defense Panel
+CORE FOCUS          : Object-Oriented Programming (OOP) Pillars, GoF Design Patterns, JDBC/CSV Dual
+                      Storage, Role-Based Access Control, Ugandan Automotive Economics (UGX)
+DOCUMENT PURPOSE    : Complete preparation kit for group discussions, rehearsal, and defense.
+                      Every question includes a plain-English explanation, exact code citations,
+                      and punchy examiner-ready talking points.
+====================================================================================================
+
+TABLE OF CONTENTS:
+----------------------------------------------------------------------------------------------------
+  PART 1: THE FOUR PILLARS OF OOP (Questions 01 - 12)
+  PART 2: GANG OF FOUR (GoF) DESIGN PATTERNS (Questions 13 - 24)
+  PART 3: PERSISTENCE, DUAL STORAGE & DATABASE ARCHITECTURE (Questions 25 - 30)
+  PART 4: ROLE-BASED ACCESS CONTROL (RBAC) & SECURITY (Questions 31 - 35)
+  PART 5: LOCALIZED UGANDAN BUSINESS ECONOMICS & FEATURES (Questions 36 - 40)
+  PART 6: JAVA SWING GUI ARCHITECTURE & NIMBUS THEMING (Questions 41 - 45)
+  PART 7: AUTOMATED TESTING & VERIFICATION (Questions 46 - 48)
+  PART 8: GROUP PRESENTATION STRATEGY & DEFENSE TACTICS (Questions 49 - 50)
+====================================================================================================
+
+
+====================================================================================================
+PART 1: THE FOUR PILLARS OF OBJECT-ORIENTED PROGRAMMING (OOP)
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 01: What is Object-Oriented Programming (OOP), and why did we choose it over procedural
+             programming for the VSMM application?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Procedural programming organizes code into step-by-step lists of instructions and functions that
+  manipulate global data. As software grows, procedural code becomes tangled ("spaghetti code") where
+  a change in one place breaks unrelated features.
+  OOP organizes software into self-contained "objects" that bundle both state (data/attributes) and
+  behavior (methods/functions). This mirrors real-world automotive garage operations: cars, mechanics,
+  invoices, and spare parts are distinct entities with their own rules.
+
+* WHERE IT IS USED IN VSMM:
+  - Model Package: com.vehicleservice.model
+  - Every real-world entity is a dedicated class: Vehicle.java, Customer.java, Mechanic.java,
+    ServiceRecord.java, SparePart.java, Review.java.
+  - Instead of passing raw strings and arrays between functions, our UI and services pass rich domain
+    objects like ServiceRecord across the entire architecture.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "We adopted OOP because an automotive service center is inherently object-oriented. By modeling
+  Vehicles, Customers, Mechanics, and Invoices as discrete objects, we achieved modularity, eliminated
+  code duplication, and made the system scalable for future garage expansions without rewriting core logic."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 02: What is Encapsulation, and how is it implemented across our domain models?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Encapsulation is data hiding and protection. It means making class variables (fields) private so
+  that outside classes cannot tamper with them directly. The only way to read or modify data is through
+  public getter and setter methods. This prevents external code from putting invalid data into an object.
+
+* WHERE IT IS USED IN VSMM:
+  - All domain models in package com.vehicleservice.model:
+    * Vehicle.java: private fields licensePlate, make, model, currentMileage, customerId.
+    * Customer.java: private fields customerId, name, phone, email, status.
+    * ServiceRecord.java: private fields serviceId, vehicleId, laborCost, partsCost.
+  - Access is mediated strictly via public methods like getLicensePlate() and setLicensePlate(String).
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Encapsulation safeguards internal object state. If fields were public, any UI button or background
+  thread could set a vehicle's mileage to a negative number or wipe out an invoice total. By keeping fields
+  private and providing validated accessors, we preserve strict data integrity."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 03: What are "Domain Guardrails" in Encapsulation, and where are they enforced in code?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Standard setters simply assign a value (this.x = x). A "Domain Guardrail" adds business logic and
+  validation inside the setter or constructor. If someone attempts to pass illegal data (such as a negative
+  price or a mileage that goes backward), the method rejects the input with an IllegalArgumentException.
+
+* WHERE IT IS USED IN VSMM:
+  - Vehicle.java (line 62):
+    public void setCurrentMileage(int mileage) {
+        if (mileage < 0) throw new IllegalArgumentException("Mileage cannot be negative.");
+        if (mileage < this.currentMileage)
+            throw new IllegalArgumentException("Odometer reading cannot decrease from " + this.currentMileage);
+        this.currentMileage = mileage;
+    }
+  - ServiceRecord.java (line 110):
+    Guardrails ensure labor cost and parts cost are never negative numbers.
+  - SparePart.java:
+    Ensures unitPrice >= 0 and quantityInStock >= 0.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Encapsulation in VSMM is active, not passive. In Vehicle.java, our setter enforces real-world physics:
+  an odometer reading cannot decrease. If an examiner enters -50 km or 10,000 km after 20,000 km, the
+  system blocks the entry immediately."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 04: What is Abstraction, and how does it differ from Encapsulation?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  - Encapsulation hides DATA (keeping fields private and providing getters/setters).
+  - Abstraction hides COMPLEXITY (exposing only essential operations while hiding how they work).
+  Think of driving a car: you step on the accelerator pedal (abstraction). You do not need to know how
+  the electronic fuel injection, throttle body, and cylinders calculate the stoichiometric fuel-air ratio.
+
+* WHERE IT IS USED IN VSMM:
+  - Abstract Class: com.vehicleservice.model.Vehicle
+    Hides vehicle classification complexity while exposing calculateServiceMultiplier().
+  - Interface: com.vehicleservice.model.Payable
+    Hides tax math, labor calculation, and discounts behind calculateTotalCost().
+  - Service Facade: com.vehicleservice.service.ServiceCenterManager
+    The GUI calls manager.bookService(...) without knowing whether the record is saved to MySQL or CSV.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Encapsulation bundles data and safeguards it from illegal access; Abstraction defines high-level
+  contracts so callers interact with clean interfaces without worrying about underlying algorithmic details."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 05: When should an engineer use an Abstract Class versus an Interface? Give examples.
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  - Abstract Class: Use when classes share an "IS-A" relationship and common code/fields. An abstract
+    class can have instance variables, non-abstract methods with code, and constructors.
+  - Interface: Use when classes share a "CAN-DO" capability across completely unrelated hierarchies.
+    An interface defines a pure behavioral contract (methods to be implemented) with no state.
+
+* WHERE IT IS USED IN VSMM:
+  - Abstract Class: Vehicle.java
+    Car, Motorcycle, and Truck are all Vehicles ("IS-A"). They share fields like licensePlate, make,
+    model, and mileage. Vehicle provides shared constructor logic and common getters.
+  - Interface: Payable.java
+    ServiceRecord implements Payable ("CAN-DO"). In future iterations, SparePartSale or TowingInvoice
+    could also implement Payable even though they are not service records.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "We used abstract class Vehicle because Cars, Trucks, and Motorbikes share common physical attributes
+  and state. We used interface Payable because billing is a capability that can belong to any payable
+  entity, maintaining decoupling."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 06: What is the `Vehicle` abstract class, and what contract does it enforce?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Vehicle is an abstract blueprint. You can never create an object of type "Vehicle" directly
+  (you cannot write 'new Vehicle()') because an abstract vehicle does not exist in reality; you can only
+  instantiate concrete vehicles like a Toyota Land Cruiser (Car) or a Scania R500 (Truck).
+  Vehicle forces every subclass to define its own specific behavior through abstract methods.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/model/Vehicle.java
+  - Abstract Methods enforced on subclasses:
+    1. public abstract double calculateServiceMultiplier();
+    2. public abstract int getRecommendedServiceIntervalKm();
+    3. public abstract List<String> getSpecializedInspectionItems();
+    4. public abstract String getVehicleType();
+    5. public abstract String getSpecificAttributeLabel();
+    6. public abstract String getSpecificAttributeValue();
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Vehicle enforces architectural conformity. Any developer adding a new vehicle type—such as ElectricBus—is
+  forced by the Java compiler to supply a service multiplier, an inspection checklist, and an interval,
+  preventing incomplete vehicle definitions."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 07: What is the `Payable` interface, and why is it crucial for financial abstraction?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The Payable interface defines a financial contract. Any class that implements Payable promises to
+  calculate its subtotal, apply taxes, compute the final balance, and generate an itemized invoice.
+  The billing system only cares that an entity is "Payable"—it does not care whether it is an oil change,
+  an engine replacement, or a fleet lease.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/model/Payable.java
+  - Contract Methods:
+    * double calculateSubtotal();
+    * double calculateTax();
+    * double calculateTotalCost();
+    * String generateInvoiceSummary();
+  - Implemented by: com.vehicleservice.model.ServiceRecord.java (line 21)
+    ServiceRecord calculates parts cost + labor cost, multiplies by the vehicle's specific multiplier,
+    adds 18% URA VAT, and formats the output into Ugandan Shillings (UGX).
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Payable decouples billing from maintenance. Our PaymentDialog and InvoiceDialog interact with Payable
+  references. If AutoCare introduces parts-only over-the-counter sales tomorrow, we just implement
+  Payable on CounterSale without altering the checkout GUI."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 08: What is Inheritance, and what class hierarchies exist in VSMM?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Inheritance allows a subclass ("child") to inherit attributes and methods from a superclass ("parent").
+  This promotes code reuse, avoids copy-pasting code, and creates clear hierarchical classification.
+
+* WHERE IT IS USED IN VSMM:
+  - Hierarchy 1: Vehicle -> Car, Motorcycle, Truck
+    * Car.java extends Vehicle: adds carType (SEDAN, SUV, COUPE), doorCount, isHybrid.
+    * Motorcycle.java extends Vehicle: adds engineCapacityCc, bikeType (BODA_BODA, SPORT, CRUISER), hasHelmetBox.
+    * Truck.java extends Vehicle: adds cargoCapacityTons, axleCount, hasAirBrakes.
+  - Hierarchy 2: Person -> Customer, Mechanic
+    * Person.java defines shared human identity: id, name, phone, email.
+    * Customer.java extends Person: adds customerType (RETAIL, CORPORATE, VIP) and vehicle registry.
+    * Mechanic.java extends Person: adds specialization (ENGINE, BRAKES, ELECTRICAL), hourlyRate, status.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Inheritance in VSMM eliminates over 400 lines of redundant code. Customer and Mechanic inherit common
+  fields from Person, while Car, Motorcycle, and Truck inherit registration and odometer logic from Vehicle."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 09: What does the `super` keyword do, and where is it used in constructors and methods?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The `super` keyword in Java refers directly to the immediate parent (superclass).
+  1. super(...) calls the parent constructor to initialize inherited fields.
+  2. super.methodName() invokes the parent's version of an overridden method.
+
+* WHERE IT IS USED IN VSMM:
+  - Car.java (constructor):
+    public Car(String vehicleId, String licensePlate, String make, String model, int year,
+               int currentMileage, String customerId, CarType carType, int doorCount, boolean isHybrid) {
+        super(vehicleId, licensePlate, make, model, year, currentMileage, customerId);
+        this.carType = carType;
+        this.doorCount = doorCount;
+        this.isHybrid = isHybrid;
+    }
+  - Mechanic.java (constructor):
+    Calls super(id, name, phone, email) to let Person initialize the base contact details.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In Car.java, calling super(...) ensures that base vehicle properties like license plate and odometer
+  are initialized properly according to the encapsulation rules of Vehicle before Car sets its own fields."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 10: What is Polymorphism, and what is the difference between Compile-Time and Runtime?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Polymorphism means "many forms" (Greek: poly = many, morph = form). It allows the same method call
+  to produce different behaviors depending on the actual object being invoked.
+  - Compile-Time Polymorphism (Method Overloading): Multiple methods in the same class share the same
+    name but have different parameter lists. Resolved at compile time.
+  - Runtime Polymorphism (Method Overriding): A subclass provides its own specific implementation of a
+    method defined in its parent class. Resolved dynamically at execution time.
+
+* WHERE IT IS USED IN VSMM:
+  - Overloading (Compile-Time):
+    * UIUtils.createSectionHeader(title, description) vs createSectionHeader(title, description, isDark).
+    * NotificationObserver.dispatch(recipient, channel, message) vs dispatch with 8 parameters.
+  - Overriding (Runtime):
+    * calculateServiceMultiplier() is overridden in Car, Motorcycle, and Truck.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Compile-time polymorphism gives callers flexible convenience methods, while runtime polymorphism
+  enables dynamic method dispatch where the Java Virtual Machine decides which pricing multiplier to run."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 11: How does Dynamic Method Dispatch work when calculating service costs for different vehicles?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Dynamic Method Dispatch is the JVM runtime mechanism that invokes an overridden method based on the
+  actual object type created in memory (the right-hand side of 'new'), not the reference type.
+  When ServiceRecord calculates labor cost, it calls `vehicle.calculateServiceMultiplier()`. ServiceRecord
+  does not know or care if the vehicle is a Truck, a Motorcycle, or a Car—the JVM automatically routes the
+  call to the correct subclass at runtime.
+
+* WHERE IT IS USED IN VSMM:
+  - Car.java (line 42):
+    Returns 1.0x (standard) or 1.15x for complex hybrid drivetrains.
+  - Motorcycle.java (line 38):
+    Returns 0.8x (discounted labor for compact boda-bodas).
+  - Truck.java (line 44):
+    Returns 1.7x (70% heavy-duty surcharge for commercial trucks with air brakes).
+  - ServiceRecord.java (line 124):
+    double laborCost = baseLaborRate * vehicle.calculateServiceMultiplier();
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "This is pure OOP elegance. There is no ugly switch(vehicleType) statement in ServiceRecord. If an
+  examiner asks how adding a 'Tractor' would affect the billing engine, the answer is: zero changes to
+  ServiceRecord. We simply subclass Vehicle and override calculateServiceMultiplier() to return 2.2x."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 12: How is Polymorphism used across User Roles (Admin, Mechanic, Customer)?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  When a user logs in, the authentication system verifies their credentials and returns an authenticated
+  User object. Based on the UserRole enum (ADMIN, MECHANIC, CUSTOMER), the application launches the
+  appropriate specialized portal window, configuring role-tailored dashboards and permissions.
+
+* WHERE IT IS USED IN VSMM:
+  - AuthService.java & LoginDialog.java (line 180):
+    switch (user.getRole()) {
+        case ADMIN -> new MainFrame(manager, user).setVisible(true);
+        case MECHANIC -> new MechanicPortalFrame(manager, (Mechanic) person).setVisible(true);
+        case CUSTOMER -> new CustomerPortalFrame(manager, (Customer) person).setVisible(true);
+    }
+  - In each window, the NotificationBellButton dynamically switches its scope:
+    Admin sees all dispatches; Mechanic sees assigned orders; Customer sees their own vehicle status.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Polymorphism drives our UI architecture. The same system presents three distinct operational cockpits
+  tailored to executive administration, workshop technician diagnostics, and customer self-service."
+
+
+====================================================================================================
+PART 2: GANG OF FOUR (GoF) DESIGN PATTERNS IN PRACTICE
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 13: Why are design patterns used in software engineering, and which ones are implemented in VSMM?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Design patterns are battle-tested, reusable architectural solutions to commonly occurring software
+  engineering problems. Rather than reinventing the wheel with ad-hoc code, engineers use patterns
+  established by the Gang of Four (Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides).
+
+* WHERE IT IS USED IN VSMM:
+  VSMM implements five distinct GoF Design Patterns:
+  1. Strategy Pattern: Mechanic Assignment & Payment Gateways.
+  2. Decorator Pattern: Dynamic Service Pricing & Add-on Decorators.
+  3. Observer Pattern: Event Publisher, Telecom SMS Gateway & CSV Security Audit Trail.
+  4. Facade Pattern: Unified subsystem coordination via ServiceCenterManager.
+  5. Factory Pattern: Vehicle parsing and instantiation via VehicleFactory.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Design patterns make our codebase maintainable, testable, and compliant with SOLID principles.
+  For example, our pricing adheres to the Open/Closed Principle: open for extension with new discounts,
+  closed for modification of base calculation logic."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 14: What is the Strategy Pattern, and how is it used for Mechanic Assignment?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The Strategy Pattern defines a family of interchangeable algorithms, encapsulates each one inside a
+  class, and makes them swappable at runtime. The client uses an algorithm through an interface without
+  knowing its internal mechanics.
+
+* WHERE IT IS USED IN VSMM:
+  - Package: com.vehicleservice.assignment
+  - Interface: MechanicAssignmentStrategy.java
+    public AssignmentResult assignMechanic(ServiceRecord record, List<Mechanic> mechanics, Vehicle vehicle);
+  - Concrete Strategies:
+    1. SkillMatchStrategy: Matches technician expertise to vehicle type and service package.
+    2. WorkloadBalancingStrategy: Assigns the available technician with the fewest active jobs.
+    3. RatingBasedStrategy: Routes VIP vehicles to mechanics with the highest customer star ratings.
+    4. RoundRobinStrategy: Distributes intake jobs in a fair, cyclical roster.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In ServiceBookingDialog, the garage administrator can select which assignment strategy to use via a
+  dropdown. The system switches from workload balancing to skill matching seamlessly at runtime without
+  restarting or recompiling the application."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 15: How does `SkillMatchStrategy` work in practice?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Assigning a motorcycle brake repair to a heavy-duty diesel engine specialist is inefficient.
+  SkillMatchStrategy inspects the vehicle type (Car, Motorcycle, Truck) and the required service
+  (Brake Overhaul, Engine Diagnostics, Transmission Flush) and filters available mechanics who possess
+  the exact required specialty.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/assignment/SkillMatchStrategy.java
+  - Logic:
+    1. Determines required specialization: e.g., Truck -> HEAVY_VEHICLE; Electrical -> AUTO_ELECTRICS.
+    2. Filters list of mechanics by status == AVAILABLE.
+    3. Scans mechanic specializations.
+    4. If a match is found, returns AssignmentResult(mechanic, true, "Matched specialty: " + spec).
+    5. If no exact match is available, falls back to the mechanic with the highest experience years.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "SkillMatchStrategy enforces workshop safety and competence. It guarantees that specialized jobs—like
+  high-voltage hybrid diagnostics or air-brake servicing—are assigned only to certified technicians."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 16: How does `WorkloadBalancingStrategy` prevent mechanic burnout and bay bottlenecks?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  In busy repair garages, top mechanics often get overloaded while junior mechanics sit idle.
+  WorkloadBalancingStrategy queries active workshop bay allocations and assigns incoming cars to the
+  qualified technician who currently has the minimum number of active work orders.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/assignment/WorkloadBalancingStrategy.java
+  - Logic:
+    1. Queries all active ServiceRecords with status SCHEDULED or IN_PROGRESS.
+    2. Builds a frequency map of active jobs per technician.
+    3. Selects the available mechanic with the lowest count.
+    4. Ties are broken by mechanic seniority.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "WorkloadBalancingStrategy solves an operational bottleneck. By evenly distributing repair tickets
+  across our 8 workshop bays, we minimize customer wait times and prevent technician fatigue."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 17: How is the Strategy Pattern applied to Payment Processing?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Customers settle bills using different methods: MTN Mobile Money, Airtel Money, Bank Wire, Credit Card,
+  or Cash. Each method has different transaction rules (mobile money needs a phone number and OTP;
+  cash calculates change; cards require PAN masking). The PaymentStrategy interface unifies them all.
+
+* WHERE IT IS USED IN VSMM:
+  - Package: com.vehicleservice.payment
+  - Interface: PaymentStrategy.java
+    public PaymentTransaction processPayment(double amount, ServiceRecord record);
+  - Concrete Payment Strategies:
+    * MobileMoneyPayment.java: Simulates telecom push prompt for MTN MoMo and Airtel Money UG.
+    * CashPayment.java: Validates cash tendered, checks that amount >= total, and returns change.
+    * CardPayment.java: Masks 16-digit credit card number (e.g., ****-****-****-4211) and generates auth code.
+    * BankTransferPayment.java: Validates Stanbic Bank / Centenary Bank EFT reference numbers.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In PaymentDialog, when a cashier selects 'Mobile Money' vs 'Cash', the controller simply swaps the
+  active PaymentStrategy. PaymentService executes the transaction polymorphically, keeping checkout logic
+  clean and secure."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 18: What is the Decorator Pattern, and why is it superior to multiple boolean flags for pricing?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The Decorator Pattern attaches additional responsibilities, discounts, or surcharges to an object
+  dynamically without modifying its underlying code.
+  If you use boolean flags (hasVipDiscount, hasWarranty, isExpress, hasFluids), every calculation requires
+  a messy ladder of nested if/else statements. Adding a new discount requires modifying and re-testing
+  the entire class. With Decorators, each add-on is an independent wrapper that can be stacked in any order.
+
+* WHERE IT IS USED IN VSMM:
+  - Package: com.vehicleservice.pricing
+  - Component Interface: ServicePricing.java (declares calculateFinalPrice(basePrice))
+  - Concrete Component: BaseServicePricing.java (returns unmodified labor + parts)
+  - Abstract Decorator: ServicePricingDecorator.java (wraps a ServicePricing instance)
+  - Concrete Decorators:
+    * VipDiscountDecorator.java: Applies a 15% discount for VIP customer loyalty.
+    * PromotionalDiscountDecorator.java: Deducts a promotional voucher (e.g., UGX 50,000 off).
+    * ExtendedWarrantyDecorator.java: Adds a 6-month mechanical warranty surcharge (+UGX 120,000).
+    * PremiumSyntheticFluidsDecorator.java: Upgrades engine fluids to Castrol Edge (+UGX 85,000).
+    * ExpressPriorityServiceDecorator.java: Bumps vehicle to Bay 1 Priority Queue (+25% rush fee).
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "The Decorator Pattern directly fulfills the Open/Closed Principle. We can combine a VIP discount, an
+  extended warranty, and express rush service like stacking Russian nesting dolls—without changing a single
+  line in BaseServicePricing."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 19: How do `VipDiscountDecorator`, `ExtendedWarrantyDecorator`, and `ExpressPriorityServiceDecorator`
+             execute calculation math in a decorator chain?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  When decorators are chained, calling calculateFinalPrice() on the outermost decorator cascades through
+  each wrapped decorator until it hits BaseServicePricing, and then unwinds back up, applying fees and
+  discounts sequentially.
+
+* WHERE IT IS USED IN VSMM:
+  - Code Example (Demonstrated in VehicleServiceTest.java, Test 07):
+    ServicePricing pricing = new BaseServicePricing(); // UGX 500,000
+    pricing = new ExpressPriorityServiceDecorator(pricing); // +25% -> UGX 625,000
+    pricing = new ExtendedWarrantyDecorator(pricing); // +UGX 120,000 -> UGX 745,000
+    pricing = new VipDiscountDecorator(pricing); // -15% VIP -> UGX 633,250
+    double finalCost = pricing.calculateFinalPrice(500000);
+  - Each decorator overrides calculateFinalPrice:
+    return wrapped.calculateFinalPrice(basePrice) * 0.85;
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "The execution order is predictable and composable. In JUnit Test 7, we verify that wrapping BaseServicePricing
+  with multiple decorators computes the exact expected Ugandan Shilling total down to the cent."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 20: What is the Observer Pattern, and why is it considered a decoupled architecture?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The Observer Pattern defines a one-to-many dependency between objects. When one object (the Subject)
+  changes its state, all its registered dependents (Observers) are notified and updated automatically.
+  It is decoupled because the Subject only knows that its listeners implement a simple interface
+  (ServiceEventListener). The Subject has zero knowledge of what the listeners do with the information.
+
+* WHERE IT IS USED IN VSMM:
+  - Package: com.vehicleservice.observer
+  - Subject: ServiceEventPublisher.java
+    Maintains a list of ServiceEventListener listeners. Exposes addListener() and publishEvent().
+  - Observer Interface: ServiceEventListener.java
+    void onServiceEvent(ServiceEvent event);
+  - Concrete Observers:
+    1. NotificationObserver.java: Dispatches role-scoped telecom SMS (MTN/Airtel) and gateway alerts.
+    2. AuditLogObserver.java: Appends security compliance records to data/audit_logs.csv.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "MaintenanceService does not know about SMS gateways or CSV logging. When an order status changes,
+  it simply fires an event to ServiceEventPublisher. If we decide to add email or WhatsApp notifications
+  tomorrow, we create a new Observer without modifying existing maintenance code."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 21: What are the Subject and Observer components in our Notification and Audit system?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  - Subject (Publisher): ServiceEventPublisher.java. It is the central event distributor.
+  - Event Object: ServiceEvent.java. Carries event metadata: timestamp, actor (e.g. "Admin", "Dave"),
+    targetEntityId (e.g. "SRV-1002"), eventType (enum), and textual description.
+  - Concrete Observer 1: NotificationObserver.java. Parses the event and dispatches telecom SMS.
+  - Concrete Observer 2: AuditLogObserver.java. Persists an immutable security audit log.
+
+* WHERE IT IS USED IN VSMM:
+  - ServiceCenterManager.java (constructor lines 55-65):
+    this.eventPublisher = new ServiceEventPublisher();
+    this.auditLogObserver = new AuditLogObserver(this.storage.getDataDirectory());
+    this.notificationObserver = new NotificationObserver();
+    this.notificationObserver.setManager(this);
+    this.eventPublisher.addListener(auditLogObserver);
+    this.eventPublisher.addListener(notificationObserver);
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "During initialization in ServiceCenterManager, we wire both observers into the publisher. Whenever
+  a booking is made or a payment is processed anywhere in the system, both the SMS drawer and the
+  security audit log are updated simultaneously."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 22: How does `NotificationObserver` route simulated SMS to MTN, Airtel, and Admin?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  When an event occurs, different people need different information:
+  - Customer: Needs SMS alerts about their car's progress (booking confirmed, inspection done, invoice paid).
+  - Mechanic: Needs alerts about jobs assigned to them, status updates, and customer reviews.
+  - Administrator: Needs the master live feed of every activity across the garage.
+  NotificationObserver acts as a role-scoped telecom router, creating OutboundNotification objects tagged
+  with customer IDs, mechanic names, and vehicle IDs.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/observer/NotificationObserver.java
+  - Method: onServiceEvent(ServiceEvent event)
+    * SERVICE_ORDER_CREATED:
+      Dispatches MTN SMS to Customer ("Dear Alice, appointment confirmed for Toyota Land Cruiser...").
+      Dispatches Airtel SMS to Mechanic ("Technician Dave: Assigned to Bay 2 for inspection...").
+      Dispatches Internal Alert to Admin Master Console.
+    * PAYMENT_RECORDED:
+      Dispatches MTN MoMo receipt SMS to Customer.
+      Dispatches Airtel alert to Mechanic clearing vehicle for customer release.
+      Dispatches Digital Gateway alert to Finance Desk.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In NotificationCenterDialog, the bell drawer filters notifications based on the logged-in role.
+  A customer never sees another customer's car or raw workshop telemetry; a mechanic only sees their
+  assigned jobs; and the administrator has oversight of the entire garage."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 23: What is the Facade Pattern, and why is `ServiceCenterManager` the architectural backbone of VSMM?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The Facade Pattern provides a simplified, unified high-level interface to a complex subsystem of
+  multiple underlying services. Instead of UI dialogs dealing with 8 separate services and databases
+  directly, the UI talks exclusively to one friendly "front door": ServiceCenterManager.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/service/ServiceCenterManager.java
+  - Coordinates Subservices:
+    1. CustomerService (client accounts)
+    2. VehicleService (fleet registry)
+    3. MaintenanceService (work orders & bay allocation)
+    4. MechanicService (technician directory & wages)
+    5. InventoryService (spare parts inventory & reorder levels)
+    6. PaymentService (settlements & transactions)
+    7. ReviewService (customer ratings & feedback)
+    8. AuthService (role-based login credentials)
+  - Also manages Storage (DatabaseManager + CsvStorage) and the Observer Publisher.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "ServiceCenterManager is our central Facade. UI frames like MainFrame and CustomerPortalFrame only take
+  a reference to ServiceCenterManager. This prevents UI components from becoming tightly coupled to
+  underlying persistence or calculation sub-services."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 24: What is the Factory Pattern, and how does `VehicleFactory` instantiate polymorphic vehicles?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The Factory Pattern defines an interface or method for creating an object, but lets the factory decide
+  which concrete class to instantiate based on parameters.
+  When loading vehicles from a database or CSV file, the raw data row simply has a column like
+  "VEHICLE_TYPE=CAR". The client code should not need if/else blocks to instantiate classes; it delegates
+  this parsing to VehicleFactory.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/model/VehicleFactory.java
+  - Method:
+    public static Vehicle createVehicle(String type, String id, String plate, String make, String model,
+                                       int year, int mileage, String custId, Map<String, String> attributes)
+  - Logic:
+    * If type == "CAR", parses carType, doorCount, isHybrid -> returns new Car(...).
+    * If type == "MOTORCYCLE", parses engineCapacityCc, bikeType -> returns new Motorcycle(...).
+    * If type == "TRUCK", parses cargoTons, axles, airBrakes -> returns new Truck(...).
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "VehicleFactory encapsulates object creation. Both DatabaseManager and CsvStorage pass raw database
+  result sets to VehicleFactory, which safely reconstructs the proper polymorphic Car, Motorcycle, or
+  Truck instance."
+
+
+====================================================================================================
+PART 3: PERSISTENCE, DUAL STORAGE & DATABASE ARCHITECTURE
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 25: What is the Dual-Storage Engine in VSMM, and why is it a game-changer for presentations?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Many student projects crash during live defense presentations because XAMPP or MySQL server fails
+  to start, the port 3306 is blocked, or the database password does not match.
+  VSMM features an enterprise "Dual-Storage Engine":
+  1. Primary Tier: Relational MySQL database connected via JDBC (`autocare_db`).
+  2. Fail-Safe Secondary Tier: Persistent, structured CSV flat files in the `/data` folder.
+  If MySQL is available, the system connects to JDBC and synchronizes. If MySQL is unavailable, it
+  silently and smoothly falls back to CSV storage with 100% of all features operational.
+
+* WHERE IT IS USED IN VSMM:
+  - Package: com.vehicleservice.storage
+  - DatabaseManager.java: Manages JDBC connections, schema migrations, and SQL queries.
+  - CsvStorage.java: Manages reading and writing customers.csv, vehicles.csv, services.csv,
+    mechanics.csv, parts.csv, and reviews.csv.
+  - ServiceCenterManager constructor: Tries DatabaseManager first; if connection fails, catches the
+    exception gracefully and operates in CSV mode without crashing.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Our dual-storage architecture ensures high availability. It proves that our domain business logic
+  is independent of the persistence technology—a core tenet of Clean Architecture."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 26: What happens if MySQL is disconnected or offline during examination?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  The application does NOT throw an unhandled SQLException or crash with a red terminal stack trace.
+  Instead, DatabaseManager catches the connection timeout, logs an informative notice to the console,
+  and delegates all CRUD (Create, Read, Update, Delete) operations to CsvStorage. The user in the GUI
+  sees a friendly status bar notice ("Storage: Persistent CSV Fallback Mode"), and all tables and charts
+  continue to populate normally.
+
+* WHERE IT IS USED IN VSMM:
+  - DatabaseManager.java (line 88):
+    try {
+        this.connection = DriverManager.getConnection(JDBC_URL, USER, PASS);
+        this.connected = true;
+    } catch (SQLException e) {
+        System.err.println("Notice: MySQL server unavailable (" + e.getMessage() + "). Operating in CSV Fail-Safe mode.");
+        this.connected = false;
+    }
+  - In MainFrame and DashboardPanel, the status bar displays "Storage: MySQL JDBC" or "Storage: CSV Local".
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "We designed the system with fault tolerance. An examiner can pull the network cable or stop MySQL,
+  and VSMM will continue booking services, updating statuses, and generating invoices without missing a beat."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 27: How does bi-directional synchronization work between MySQL JDBC and CSV files?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  When MySQL is connected, we don't want CSV files to become stale out-of-date backups. Whenever a
+  vehicle is registered, an order is updated, or a bill is paid, the system writes to MySQL AND flushes
+  to the corresponding CSV file. Furthermore, clicking the "Sync Data" button in the sidebar triggers
+  a two-way reconciliation reconciling any discrepancy.
+
+* WHERE IT IS USED IN VSMM:
+  - Storage package: CsvStorage.java & DatabaseManager.java
+  - Method: syncToCsv() and syncFromCsv()
+  - Synchronizes 7 core CSV tables:
+    * data/customers.csv
+    * data/vehicles.csv
+    * data/mechanics.csv
+    * data/services.csv
+    * data/spare_parts.csv
+    * data/reviews.csv
+    * data/mechanic_reports.csv
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Bi-directional sync provides automated offline-first redundancy. Changes made during an offline
+  session are retained in CSV and can be synchronized to the relational database upon reconnection."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 28: How does DatabaseManager prevent SQL Injection attacks?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  SQL Injection occurs when malicious user input is concatenated directly into SQL queries
+  (e.g., "SELECT * FROM users WHERE user = '" + input + "'"). An attacker could type "' OR '1'='1" to
+  bypass passwords or "'; DROP TABLE vehicles; --" to delete tables.
+  VSMM uses PreparedStatement with parameterized queries (using '?') everywhere. The database driver treats
+  all user inputs strictly as literal data, never as executable SQL commands.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/storage/DatabaseManager.java
+  - Example:
+    String sql = "INSERT INTO services (service_id, vehicle_id, customer_id, service_date, service_type, " +
+                 "status, labor_cost, parts_cost, notes, technician_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, s.getServiceId());
+        ps.setString(2, s.getVehicleId());
+        ps.setString(3, s.getCustomerId());
+        ps.setDate(4, java.sql.Date.valueOf(s.getServiceDate()));
+        ps.setString(5, s.getServiceType().name());
+        ps.setString(6, s.getStatus().name());
+        ps.setDouble(7, s.getLaborCost());
+        ps.setDouble(8, s.getPartsCost());
+        ps.setString(9, s.getServiceNotes());
+        ps.setString(10, s.getTechnicianName());
+        ps.executeUpdate();
+    }
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Every database query in VSMM uses parameterized PreparedStatements with automatic try-with-resources
+  leak prevention, ensuring complete immunity against SQL injection vulnerabilities."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 29: What is `DriverShim` and dynamic classloading in `DatabaseManager.java`, and why was it necessary?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  In Apache NetBeans and Maven environments, the JDBC driver (`mysql-connector-j-9.7.0.jar`) is often
+  loaded by a different classloader than the application when executed via `mvn exec:java`. When Java's
+  `DriverManager.getConnection()` is called, DriverManager refuses to use a driver loaded by a child
+  classloader for security reasons, throwing `SQLException: No suitable driver found`.
+  A `DriverShim` is an elegant design pattern wrapper that implements `java.sql.Driver` and delegates to
+  the dynamically loaded driver, registering it with DriverManager so it works in any execution context.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/storage/DatabaseManager.java (lines 50-78)
+  - Class: private static class DriverShim implements Driver
+  - Dynamic loader: Scans project lib directory, creates URLClassLoader, loads com.mysql.cj.jdbc.Driver,
+    wraps it in DriverShim, and calls DriverManager.registerDriver(new DriverShim(driver)).
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "This solves a notorious NetBeans/Maven desktop classpath isolation defect. Our self-healing classloader
+  guarantees that the MySQL driver is loaded dynamically whether the app is launched from NetBeans IDE,
+  command line Maven, or a standalone double-clickable batch script."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 30: How are database transactions and referential integrity maintained across services,
+             customers, and parts?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Referential integrity means relationships between tables remain valid:
+  - A Vehicle cannot be saved without a valid Customer ID.
+  - A ServiceRecord cannot exist without a valid Vehicle and Customer.
+  - An Invoice cannot deduct spare parts that do not exist in inventory.
+  Foreign keys in `autocare_db.sql` and programmatic checks in our Service layer enforce these relationships.
+
+* WHERE IT IS USED IN VSMM:
+  - SQL Schema: autocare_db.sql (lines 40-75)
+    * FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
+    * FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id) ON DELETE CASCADE
+  - MaintenanceService.java:
+    Before booking a service, validates that the vehicle exists in VehicleService and that the assigned
+    mechanic is registered in MechanicService.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "We maintain referential integrity at both levels: relational foreign key constraints in MySQL and
+  validation guards in MaintenanceService. This prevents orphaned service records or broken links."
+
+
+====================================================================================================
+PART 4: ROLE-BASED ACCESS CONTROL (RBAC) & SECURITY
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 31: What is Role-Based Access Control (RBAC), and how does `AuthService` authenticate users?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  RBAC restricts system access based on the roles assigned to individual users.
+  In VSMM, we have three distinct roles defined by the UserRole enum:
+  1. ADMIN: Full authority over finance, staff rosters, inventory adjustments, and system audit logs.
+  2. MECHANIC: Limited to assigned workshop bay orders, diagnostic checklists, and technical reports.
+  3. CUSTOMER: Limited to their own personal vehicles, repair progress tracker, and payment receipts.
+
+* WHERE IT IS USED IN VSMM:
+  - Model: com.vehicleservice.model.UserRole (ADMIN, MECHANIC, CUSTOMER)
+  - Service: com.vehicleservice.service.AuthService.java
+  - Method:
+    public Optional<User> authenticate(String identifier, String password);
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Security follows the Principle of Least Privilege: users only have access to the data and operations
+  essential to their role. A customer cannot modify mechanic wages, and a mechanic cannot access global
+  garage profit analytics."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 32: How does multi-credential login work in `AuthService.java`?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Users rarely remember arbitrary system usernames. A customer might remember their phone number
+  ("0772123456"), their email ("alice@gmail.com"), or their Customer ID ("CUST-101").
+  AuthService accepts any of these identifiers interchangeably, normalizes the string, matches it against
+  the user database, and checks the password hash.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/service/AuthService.java
+  - Logic:
+    1. Checks if identifier matches username.
+    2. If not, checks if identifier matches customer ID or mechanic ID.
+    3. If not, checks if identifier matches registered phone number.
+    4. If not, checks if identifier matches registered email address.
+    5. Once matched, verifies password (e.g., "admin123", "dave123", "alice123").
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Our authentication design mimics modern consumer portals. In LoginDialog, customer Alice Nabatanzi can
+  log in using 'alice', 'CUST-101', 'alice@example.com', or '+256 772 123456' with equal convenience."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 33: How does the system restrict a Customer to see only their own vehicles and service progress?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  When customer Alice logs in, CustomerPortalFrame receives Alice's Customer object. Every query executed
+  by the customer portal passes Alice's customerId as an immutable filter. Alice's fleet table only shows
+  vehicles where `vehicle.getCustomerId().equals("CUST-101")`. Her billing tab only calculates totals from
+  her own invoices.
+
+* WHERE IT IS USED IN VSMM:
+  - CustomerPortalFrame.java (lines 1150-1200):
+    List<Vehicle> myVehicles = manager.getVehicleService().findByCustomerId(customer.getCustomerId());
+    List<ServiceRecord> myServices = manager.getMaintenanceService().findByCustomerId(customer.getCustomerId());
+  - NotificationCenterDialog.createBellButton:
+    Passes (this, manager, isDarkMode, UserRole.CUSTOMER, customer), filtering the notification feed to
+    match Alice's ID and vehicle plate numbers.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Information isolation is enforced at the controller level. Even if there are 1,000 vehicles in the
+  garage database, CustomerPortalFrame will only fetch and display records belonging to the authenticated
+  session customer."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 34: How does the system restrict a Mechanic to see only assigned jobs and workshop reports?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  A workshop technician like Dave Mukasa needs to focus on the cars in his bay, not other mechanics'
+  tasks. MechanicPortalFrame is passed Dave's Mechanic object. It queries MaintenanceService for service
+  orders where `technicianName.equalsIgnoreCase(mechanic.getName())`. Dave can update progress or submit
+  reports only for his assigned jobs.
+
+* WHERE IT IS USED IN VSMM:
+  - MechanicPortalFrame.java (lines 350-400):
+    List<ServiceRecord> myJobs = manager.getMaintenanceService().findByTechnicianName(mechanic.getName());
+  - In Action Hub:
+    "Update Progress", "Submit Report", and "Inspection Checklist" operate strictly on the selected
+    assigned work order from Dave's filtered table.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "This keeps workshop operations organized and accountable. A technician cannot inadvertently overwrite
+  another technician's diagnosis or work order."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 35: What is the CSV Audit Trail (`AuditLogObserver`), and what security purpose does it serve?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  An audit trail is an append-only, tamper-evident log that records every critical security and business
+  action: who performed it, when it happened, which entity was affected, and what changed. This is
+  required for financial accountability and fraud detection.
+  Whenever a service is booked, a status changed, or a payment recorded, AuditLogObserver automatically
+  appends a row to `data/audit_logs.csv`.
+
+* WHERE IT IS USED IN VSMM:
+  - Observer: com.vehicleservice.observer.AuditLogObserver.java
+  - Storage: data/audit_logs.csv
+  - Viewer Dialog: com.vehicleservice.ui.dialogs.AuditTrailDialog.java
+  - Format in CSV:
+    TIMESTAMP,ACTOR,EVENT_TYPE,TARGET_ID,DESCRIPTION
+    2026-10-28T14:32:10,Admin,SERVICE_ORDER_CREATED,SRV-1002,Booked oil change for UBL 421A
+    2026-10-28T14:35:22,Dave Mukasa,SERVICE_STATUS_UPDATED,SRV-1002,Progress updated to IN_PROGRESS
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In the Admin console under 'Reports & Analytics', examiners can click 'Security Audit' to open
+  AuditTrailDialog. It displays a live table of all system events recorded by the Observer Pattern,
+  proving full accountability."
+
+
+====================================================================================================
+PART 5: LOCALIZED UGANDAN BUSINESS ECONOMICS & FEATURES
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 36: Why did we build the system around Ugandan Shillings (UGX) instead of USD?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Generic software projects often default to US Dollars ($) with unrealistic $20 oil changes.
+  VSMM was specifically engineered for the Kampala automotive market. Labor rates, spare part catalogs,
+  mechanic wages, and customer invoices reflect authentic Ugandan economic scales (UGX 50,000 to
+  UGX 3,500,000). This demonstrates practical contextual understanding to academic panels.
+
+* WHERE IT IS USED IN VSMM:
+  - Formatter: com.vehicleservice.ui.util.UIUtils.formatCurrency(double amount)
+    Formats numbers into "UGX #,##0.00" (e.g., UGX 450,000.00).
+  - All financial calculations across ServiceRecord, Payable, and SparePartEstimator use UGX scales.
+  - Test Suite: VehicleServiceTest explicitly asserts amounts in UGX.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Localizing in UGX avoids floating-point micro-cents and ensures the system is production-ready for
+  Ugandan auto workshops. From spare parts to VAT, all financial calculations match local commercial standards."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 37: How does `SparePartEstimator` scale prices based on Ugandan brand tiers?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  A brake pad for a Bajaj Boxer motorcycle costs far less than a brake pad for a Toyota Land Cruiser,
+  which costs less than a ceramic brake pad for a Mercedes-Benz G-Wagon.
+  SparePartEstimator defines realistic baseline prices for common maintenance parts and scales them
+  by Ugandan Brand Tier multipliers:
+  1. BODA / MOTORCYCLE: 0.4x (budget scale)
+  2. TOYOTA / JAPANESE POPULAR: 1.0x (standard Kampala market benchmark)
+  3. COMMERCIAL DIESEL (ISUZU, MITSUBISHI FUSO): 1.6x (heavy-duty fleet)
+  4. EUROPEAN LUXURY (MERCEDES, BMW, RANGE ROVER): 2.4x (premium imported OEM parts)
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/pricing/SparePartEstimator.java
+  - Method:
+    public static double estimatePartCost(String partName, Vehicle vehicle);
+  - Integrates into ServiceBookingDialog: When an admin selects a service package (e.g. Brake Service),
+    the estimated parts cost automatically calculates based on whether the vehicle is a Boda, Toyota, or Benz.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "SparePartEstimator reflects real automotive market realities in Uganda. Replacing brake pads on a
+  Mercedes costs more than on a Toyota Premio due to OEM importation logistics."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 38: How is the Uganda Revenue Authority (URA) 18% standard VAT calculated in `Payable`?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  By Ugandan tax law, registered commercial garages must levy 18% Value Added Tax (VAT) on taxable
+  services and parts.
+  The Payable interface enforces standard tax computation:
+  Subtotal = (Parts Cost + Labor Cost) * Vehicle Multiplier
+  Tax (18% VAT) = Subtotal * 0.18
+  Total Cost = Subtotal + Tax
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/model/ServiceRecord.java (implements Payable)
+    public double calculateSubtotal() { return (partsCost + laborCost) * vehicle.calculateServiceMultiplier(); }
+    public double calculateTax() { return calculateSubtotal() * 0.18; }
+    public double calculateTotalCost() { return calculateSubtotal() + calculateTax(); }
+  - InvoiceDialog.java: Displays explicit line items: Subtotal, URA 18% VAT, and Grand Total in UGX.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Our billing engine is compliant with Uganda Revenue Authority guidelines. The 18% VAT is itemized
+  transparently on every printable customer invoice and payment receipt."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 39: How do mobile money channels (MTN MoMo and Airtel Money) process transactions in the app?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Over 80% of retail transactions in Uganda occur via mobile money rather than credit cards.
+  VSMM implements MobileMoneyPayment (a concrete Strategy), which simulates the complete mobile money
+  intake workflow:
+  1. Validates Ugandan cellular number (+256 77X for MTN, +256 75X / 70X for Airtel).
+  2. Generates an authentic telecom transaction reference (e.g., "MTN-MM-948172").
+  3. Prompts the customer for PIN authorization via simulated USSD push prompt.
+  4. Records the settlement in PaymentService.
+
+* WHERE IT IS USED IN VSMM:
+  - Payment Strategy: com.vehicleservice.payment.MobileMoneyPayment.java
+  - Dialog: com.vehicleservice.ui.dialogs.PaymentDialog.java
+  - Observer: NotificationObserver sends an immediate confirmation SMS via "MTN SMS UG" or "Airtel SMS UG".
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In PaymentDialog, examiners can test live mobile money checkout. Selecting MTN MoMo prompts for a
+  phone number, generates a receipt reference, and triggers an instant simulated SMS confirmation."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 40: What is the official Roadworthiness Certificate Exporter (`CertificateExporter.java`)?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  After completing a major overhaul or multi-point safety inspection, vehicle owners need official
+  roadworthiness documentation for insurance and regulatory compliance.
+  CertificateExporter compiles vehicle specifications, inspection grades, and technician signatures
+  into a printable, responsive HTML certificate saved to the `/certificates` folder and opened in the browser.
+
+* WHERE IT IS USED IN VSMM:
+  - Utility: com.vehicleservice.util.CertificateExporter.java
+  - Method:
+    public static File exportCertificate(Vehicle vehicle, ServiceRecord service, String customerName);
+  - Action: Triggered from CustomerPortalFrame and ReportsPanel ("Export Safety Certificate").
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "In addition to Java Swing GUI views, VSMM can generate standalone, print-ready HTML5 Roadworthiness
+  Certificates stamped with official Kampala garage accreditation and technician endorsements."
+
+
+====================================================================================================
+PART 6: JAVA SWING GUI ARCHITECTURE & NIMBUS THEMING
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 41: What is the Swing Event Dispatch Thread (EDT), and why must `SwingUtilities.invokeLater` be used?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Java Swing is single-threaded. All GUI creation, painting, button clicks, and mouse events MUST
+  execute on one dedicated thread: the Event Dispatch Thread (EDT).
+  If you modify GUI components from a background thread (or the initial main() thread), you risk thread
+  race conditions, visual glitches, and freezing. `SwingUtilities.invokeLater(Runnable)` safely queues
+  the GUI task onto the EDT.
+
+* WHERE IT IS USED IN VSMM:
+  - Main.java (entry point lines 25-35):
+    SwingUtilities.invokeLater(() -> {
+        new LoginDialog(manager).setVisible(true);
+    });
+  - NotificationObserver.NotificationListener:
+    When an event fires, NotificationBellButton uses SwingUtilities.invokeLater(() -> updateCount())
+    so the badge updates smoothly without thread collisions.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Thread safety is rigorously maintained. Every UI update—including asynchronous SMS notification badge
+  increments—is dispatched through SwingUtilities.invokeLater to guarantee rock-solid stability on the EDT."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 42: What Look-and-Feel does VSMM use, and what is the Nimbus UI delegate architecture?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Java Swing defaults to the dated "Metal" look. VSMM initializes the modern "Nimbus" Look and Feel.
+  Nimbus is a vector-based, resolution-independent engine introduced by Sun Microsystems / Oracle.
+  It uses Synth painters that draw components using 2D vector shapes rather than static bitmap images,
+  allowing clean scaling on high-DPI modern displays.
+
+* WHERE IT IS USED IN VSMM:
+  - Main.java (lines 45-60):
+    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+        if ("Nimbus".equals(info.getName())) {
+            UIManager.setLookAndFeel(info.getClassName());
+            break;
+        }
+    }
+  - UIUtils.java configures global Nimbus palette overrides for buttons, tables, and borders.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Nimbus gives our desktop application a polished vector appearance that scales smoothly across both
+  1080p and 4K displays without jagged pixelation."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 43: What was the non-editable `JTextArea` bug in Nimbus dark mode, and how was it permanently fixed?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  In Nimbus, when `txtArea.setEditable(false)` is set, Nimbus's internal Synth painter automatically
+  replaces the component's foreground color with `TextArea[NotEditable].textForeground` (which defaults
+  to dark charcoal `#333333`). Calling `txtArea.setForeground(Color.WHITE)` is completely ignored!
+  On a dark navy card (`#0c1836`), charcoal text is literally invisible!
+  We resolved this by setting `txtArea.setUI(new BasicTextAreaUI())`, which completely bypasses Nimbus's
+  Synth painter, and overriding `paintComponent` to dynamically enforce `Color.WHITE` in dark mode.
+
+* WHERE IT IS USED IN VSMM:
+  - File: src/main/java/com/vehicleservice/ui/dialogs/NotificationCenterDialog.java
+  - JTextArea txtMsg in createNotificationCard:
+    txtMsg.setUI(new BasicTextAreaUI());
+    txtMsg.setForeground(isDarkMode ? Color.WHITE : new Color(15, 23, 42));
+    txtMsg.setDisabledTextColor(isDarkMode ? Color.WHITE : new Color(15, 23, 42));
+  - Also applied to txtNotes in CustomerPortalFrame's 3-stage progress pipeline widget.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "This is a demonstration of deep Swing framework expertise. Rather than accepting Nimbus's default
+  limitations, we installed a custom BasicTextAreaUI delegate, ensuring 100% crystal-clear, brilliant
+  white typography in Cyber-Dark mode."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 44: How does the Dual-Theme engine (Cyber-Dark vs Executive White Theme) toggle all components?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Different users prefer different visual modes: garage mechanics in dimly lit bays prefer high-contrast
+  Cyber-Dark mode (`#070e22` / `#0c1836`); financial managers presenting reports in daylight prefer
+  clean Executive White mode (`#f1f5f9` / `#ffffff`).
+  VSMM features a reactive theming engine. Clicking the "White Theme / Dark Theme" toggle invokes
+  `setDarkMode(boolean)` recursively down through all panels, headers, tables, gauges, and notification bells.
+
+* WHERE IT IS USED IN VSMM:
+  - MainFrame.java, CustomerPortalFrame.java, MechanicPortalFrame.java:
+    private boolean isDarkMode = true;
+    public void toggleTheme() { setDarkMode(!isDarkMode); }
+  - Every child panel (DashboardPanel, VehiclePanel, ServicePanel) implements setDarkMode(boolean).
+  - UIUtils.styleTable, UIUtils.styleSearchField, UIUtils.styleComboBox, and UIUtils.styleScrollPane
+    all accept boolean isDarkMode to update tables and inputs in real time.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Our theming engine updates dynamically without needing an application restart. Every table cell,
+  circular gauge, navigation pill, and search field repaints instantly with optimal contrast."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 45: How are custom vector graphics drawn using `Graphics2D` (gauges, car silhouette, charts)?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Instead of relying on third-party charting libraries, VSMM uses pure Java 2D vector drawing
+  (`java.awt.Graphics2D`). We override `paintComponent(Graphics g)`, enable anti-aliasing hints
+  (`RenderingHints.KEY_ANTIALIASING`), and draw smooth geometric paths, arcs, gradients, and silhouettes.
+
+* WHERE IT IS USED IN VSMM:
+  - CircularProgressGauge (DashboardPanel & MechanicPortalFrame):
+    Uses `g2.draw(new Arc2D.Double(...))` and GradientPaint to create a glowing circular repair progress ring.
+  - CarSilhouetteIcon (DashboardPanel & CustomerPortalFrame):
+    Uses `Path2D.Double` with cubic Bezier curves (`p.curveTo(...)`) to draw a sleek sports car outline.
+  - WeeklyRevenueChart (DashboardPanel):
+    Draws custom vector bar charts showing daily UGX intake with gradient fills.
+  - FleetDonutChart (DashboardPanel):
+    Draws segmented circular donut graphs showing fleet breakdown (Cars vs Trucks vs Boda-Bodas).
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "All dashboards and indicators are 100% pure Java AWT/Swing vector graphics. Zero external dependencies
+  or JAR files were used for our charts and gauges, resulting in a lightweight, lightning-fast application."
+
+
+====================================================================================================
+PART 7: AUTOMATED TESTING & CODE VERIFICATION
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 46: What automated testing framework does VSMM use, and what does `VehicleServiceTest.java` test?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Software verification through manual clicking is slow and error-prone. VSMM uses JUnit 5 (Jupiter),
+  the industry standard Java testing framework.
+  Our automated test suite in `VehicleServiceTest.java` contains 18 rigorous unit tests covering domain
+  calculations, polymorphism, design patterns, security guardrails, and persistent storage.
+
+* WHERE IT IS USED IN VSMM:
+  - Test File: src/test/java/com/vehicleservice/VehicleServiceTest.java
+  - Framework: org.junit.jupiter.api.Test, Assertions (assertEquals, assertTrue, assertThrows)
+  - 18 Test Cases:
+    * Test 01: Polymorphic Multipliers for Car, Motorcycle, Truck.
+    * Test 02: Encapsulation Mileage Guardrail (rejects decreasing mileage).
+    * Test 03: Service Record Payable Totals & 18% URA VAT math.
+    * Test 04: Skill-Match Mechanic Assignment Strategy.
+    * Test 05: Workload-Balancing Mechanic Assignment Strategy.
+    * Test 06: Rating-Based Mechanic Assignment Strategy.
+    * Test 07: Chained Decorator Pricing (VIP Discount + Warranty + Express).
+    * Test 08: Cash Payment Change Calculation.
+    * Test 09: Mobile Money Transaction Masking & Telecom Ref.
+    * Test 10: Credit Card PAN Masking (****-****-****-4211).
+    * Test 11: Inventory Auto-Deduction & Low Stock Warnings.
+    * Test 12: Observer Pattern Event Dispatching to Listeners.
+    * Test 13: Customer Multi-Credential Authentication.
+    * Test 14: Vehicle Factory Polymorphic Instantiation.
+    * Test 15: Roadworthiness Certificate HTML File Generation.
+    * Test 16: Mechanic Review Submission & Star Rating Average.
+    * Test 17: CSV Storage Persistence & Recovery.
+    * Test 18: Notification Observer Role-Based Filtering.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "We don't just say our software works—we prove it mathematically. Running 'mvn test' executes 18 unit
+  tests in under 6 seconds with 0 failures and 0 errors, validating every critical algorithm."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 47: How do unit tests verify Polymorphism, Decorator math, and Encapsulation guardrails?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  JUnit assertions programmatically test edge cases:
+  - For Polymorphism: `assertEquals(1.7, truck.calculateServiceMultiplier(), 0.001);`
+  - For Decorators: `assertEquals(633250.0, pricing.calculateFinalPrice(500000), 0.01);`
+  - For Encapsulation: `assertThrows(IllegalArgumentException.class, () -> car.setCurrentMileage(5000));`
+    Tests pass ONLY if the setter throws the expected exception when given invalid data!
+
+* WHERE IT IS USED IN VSMM:
+  - VehicleServiceTest.java:
+    * testEncapsulationMileageGuardrail(): Verifies that rolling back an odometer reading from 15,000 km
+      to 10,000 km is blocked.
+    * testDecoratorChainPricing(): Verifies that a stacked chain of Express rush (+25%), Extended warranty
+      (+UGX 120,000), and VIP loyalty discount (-15%) calculates the precise UGX total down to the cent.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Our tests verify negative cases as rigorously as positive ones. By using assertThrows, we prove that
+  our domain guardrails successfully reject fraudulent data."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 48: How should our group run and present the 18 passing tests during the defense?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Examiners love seeing real automated builds. Presenting the test suite takes less than 30 seconds
+  and instantly establishes academic credibility.
+  Group members can run the test suite directly from Apache NetBeans (right-click project -> Test) or
+  from the terminal using `mvn test`.
+
+* WHERE IT IS USED IN VSMM:
+  - Terminal Command:
+    mvn test
+  - Expected Terminal Output:
+    [INFO] Running com.vehicleservice.VehicleServiceTest
+    [INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.767 s
+    [INFO] BUILD SUCCESS
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Ladies and gentlemen of the examination panel, before we begin the live GUI demonstration, we invite
+  you to view our automated test execution. As you can see on the terminal, all 18 JUnit tests pass with
+  100% build success, verifying our OOP math, patterns, and security rules."
+
+
+====================================================================================================
+PART 8: GROUP PRESENTATION STRATEGY & DEFENSE TACTICS
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+QUESTION 49: What is the recommended role distribution for group members during the presentation?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Examiners judge whether all group members contributed or if one person did all the work.
+  To present a cohesive, professional front, divide responsibilities clearly across 4 or 5 roles:
+
+  * MEMBER 1: PROJECT LEAD & ARCHITECTURE OVERVIEW
+    - Introduces the project: Problem statement in Ugandan garages, system objectives, and scope.
+    - Explains Clean Architecture, the Facade Pattern (ServiceCenterManager), and project packaging.
+    - Demonstrates LoginDialog, multi-credential login, and Role-Based Access Control.
+
+  * MEMBER 2: OOP PILLARS & DOMAIN MODELING (The Core Engine)
+    - Explains the Four Pillars: Abstraction, Encapsulation, Inheritance, and Polymorphism.
+    - Shows Vehicle.java, Car.java, Motorcycle.java, Truck.java, and Person.java.
+    - Explains Dynamic Method Dispatch: How labor multipliers scale (0.8x for Boda, 1.7x for Trucks).
+    - Explains domain guardrails in setters (odometer decreasing checks).
+
+  * MEMBER 3: GANG OF FOUR (GoF) DESIGN PATTERNS
+    - Explains the Strategy Pattern (Mechanic Assignment & Payment Gateways).
+    - Explains the Decorator Pattern (BaseServicePricing wrapped by VIP, Warranty, Express decorators).
+    - Explains the Observer Pattern (ServiceEventPublisher notifying SMS and Audit observers).
+    - Explains the Factory Pattern (VehicleFactory parsing polymorphic vehicles).
+
+  * MEMBER 4: PERSISTENCE, LOCALIZATION & DUAL STORAGE
+    - Explains the Dual-Storage Engine (MySQL JDBC + CSV Fail-Safe).
+    - Explains DriverShim and self-healing classloader in NetBeans/Maven.
+    - Explains Ugandan economics: UGX currency, 18% URA VAT, SparePartEstimator, and MTN/Airtel SMS.
+    - Demonstrates data synchronization and offline resilience.
+
+  * MEMBER 5: GUI PRESENTATION, AUTOMATED TESTING & LIVE DEMO
+    - Leads the live 5-minute software demonstration:
+      1. Login as Admin -> View live KPIs, book a service with VIP decorator, show smart assignment.
+      2. Login as Mechanic -> Update job status, submit diagnostic report.
+      3. Login as Customer -> View 3-step progress tracker, inspect UGX invoice, submit 5-star review.
+    - Demonstrates NotificationCenterDialog (live telecom SMS drawer) in Cyber-Dark and White themes.
+    - Runs `mvn test` in the terminal to show 18/18 passing JUnit tests.
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Every member should know the overarching story of the project. If an examiner directs a question
+  to a specific member, that member answers confidently using the talking points in this guide."
+
+----------------------------------------------------------------------------------------------------
+QUESTION 50: How should group members handle unpredictable or difficult examiner questions?
+----------------------------------------------------------------------------------------------------
+* CONCEPT EXPLAINED SIMPLY:
+  Examiners often ask edge-case or hypothetical questions ("What if we wanted to add electric vehicles?",
+  "Why didn't you use Spring Boot?", "What happens if two mechanics grab the same car?").
+  Follow the "Acknowledge - Anchor to OOP - Answer with Code" formula:
+
+  1. STAY CALM & ACKNOWLEDGE:
+     "That is an insightful question, Professor/Examiner."
+  2. ANCHOR TO AN OOP CONCEPT OR PATTERN:
+     "Because of our adherence to the Open/Closed Principle and the Strategy Pattern..."
+  3. POINT DIRECTLY TO THE FILE:
+     "We would handle that in com.vehicleservice.model by simply subclassing..."
+
+  * EXAMPLES OF COMMON TRICK QUESTIONS & MODEL RESPONSES:
+    - Q: "Why didn't you use a web framework like Spring Boot or Django?"
+      A: "Our project specification required a standalone Java OOP desktop application in Apache NetBeans
+         with raw Swing and JDBC. By avoiding heavy web frameworks, we proved that we can implement core
+         OOP, GoF patterns, thread safety, and persistence directly in pure standard Java."
+    - Q: "What if AutoCare introduces Electric Vehicle (EV) battery servicing?"
+      A: "Because of Abstraction and Inheritance, we simply create ElectricCar extending Vehicle, override
+         calculateServiceMultiplier() to 1.3x for high-voltage battery labor, and add specialized EV
+         inspection items (Battery State of Health, Inverter Cooling). No existing billing code is touched."
+    - Q: "What happens if a user inputs text into a numeric price field?"
+      A: "All UI dialogs validate inputs inside try-catch blocks handling NumberFormatException, displaying
+         friendly error popups without terminating the application thread."
+
+* EXAMINER DEFENSE TIP / KEY TALKING POINT:
+  "Never guess or panic. Anchor your response to the Four Pillars (Abstraction, Encapsulation, Inheritance,
+  Polymorphism) or our GoF Patterns (Strategy, Decorator, Observer, Facade, Factory). The examiners will
+  respect your mastery of software architecture."
+====================================================================================================
+                             END OF 50 SAMPLE PRESENTATION QUESTIONS
+====================================================================================================

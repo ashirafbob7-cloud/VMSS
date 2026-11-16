@@ -1,0 +1,9 @@
+MechanicId,Name,Specialization,Phone,Email,Status,HourlyRate
+MECH-101,Dave Miller,Brake Systems & Heavy Suspensions,+256-772-0145,dave@autocare.co.ug,BUSY,45000.0
+MECH-102,Sam Peterson,Electrical; EV & HVAC Systems,+256-782-0147,sam@autocare.co.ug,AVAILABLE,50000.0
+MECH-103,Sarah Lin,Master Engine Diagnostics & Hybrids,+256-752-0144,sarah@autocare.co.ug,INACTIVE,55000.0
+MECH-104,Marcus Reynolds,Commercial Fleets & Transmissions,+256-702-0146,marcus@autocare.co.ug,AVAILABLE,40000.0
+MECH-105,Okuma Patrick,Transmission Specialist,+256-774-0155,okuma@autocare.co.ug,AVAILABLE,45000.0
+MECH-106,Mukisa Jesa,General Automotive,+256-728251563,mukisajesa,AVAILABLE,45000.0
+MECH-107,Mongo Mushi,General Automotive,+256-752435136,mongomushi@gmail.com,AVAILABLE,100000.0
+MECH-108,Peter Odo,Brake Systems & Heavy Suspensions,+256-762534567,peterodo@gmail.com,AVAILABLE,45000.0
